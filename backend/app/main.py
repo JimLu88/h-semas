@@ -87,6 +87,15 @@ async def sandbox_exec(body: SandboxExecRequest) -> dict | JSONResponse:
 def modes() -> list[dict]:
     return [m.model_dump() for m in list_modes()]
 
+
+@app.post("/api/decision/compare")
+def decision_compare(body: dict) -> dict:
+    from .decision_compare import compare_decisions
+    try:
+        return compare_decisions(body.get("decisions") or [])
+    except (ValueError, TypeError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
 @app.get("/api/memory/{mode_id}")
 def memory_list(mode_id: str, limit: int = 50, compact: bool = False) -> list[dict]:
     mem = DecisionMemory(Path(__file__).resolve().parent.parent / "data")
